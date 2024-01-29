@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+    </style>
+    <title>Prime Numbers</title>
+  </head>
+  <body>
+    <h1>Prime Numbers Finder</h1>
+
+    <label for="start">Start Range:</label>
+    <input type="number" id="start" name="start" />
+
+    <label for="end">End Range:</label>
+    <input type="number" id="end" name="end" />
+
+    <button onclick="findPrimes()">Find Primes</button>
+
+    <div id="result"></div>
+
+    <script>
+      function isPrime(num) {
+        if (num <= 1) return false;
+        for (let i = 2; i <= Math.sqrt(num); i++) {
+          if (num % i === 0) return false;
+        }
+        return true;
+      }
+
+      function getPrimeInRange(start, end) {
+        const primes = [];
+        const normalTimes = [];
+        const primeTimes = [];
+
+        for (let i = start; i <= end; i++) {
+          const startTime = performance.now();
+          const result = isPrime(i);
+          const endTime = performance.now();
+          const timeTaken = endTime - startTime;
+
+          normalTimes.push({ number: i, time: timeTaken });
+
+          if (result) {
+            primes.push(i);
+            primeTimes.push({ number: i, time: timeTaken });
+          }
+        }
+
+        return {
+          primes,
+          normalTimes,
+          primeTimes,
+        };
+      }
+
+      function findPrimes() {
+        const start = parseInt(document.getElementById("start").value);
+        const end = parseInt(document.getElementById("end").value);
+
+        if (isNaN(start) || isNaN(end) || start >= end) {
+          alert("Invalid range");
+          return;
+        }
+
+        const startTimeAll = performance.now();
+        const { primes, normalTimes, primeTimes } = getPrimeInRange(start, end);
+        const endTimeAll = performance.now();
+
+        const totalTimeAll = endTimeAll - startTimeAll;
+
+        displayResults(primes, normalTimes, primeTimes, totalTimeAll);
+      }
+
+      function displayResults(primes, normalTimes, primeTimes, totalTimeAll) {
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = "";
+
+        const h2 = document.createElement("h2");
+        h2.textContent = "Results:";
+        resultDiv.appendChild(h2);
+
+        const pTotalTimeAll = document.createElement("p");
+        pTotalTimeAll.textContent = `Time taken to run all instances: ${totalTimeAll} ms`;
+        resultDiv.appendChild(pTotalTimeAll);
+
+        const tableNormalTimes = createTable(
+          "Normal Times",
+          ["Number", "Time (ms)"],
+          normalTimes
+        );
+        resultDiv.appendChild(tableNormalTimes);
+
+        const tablePrimeTimes = createTable(
+          "Prime Times",
+          ["Number", "Time (ms)"],
+          primeTimes
+        );
+        resultDiv.appendChild(tablePrimeTimes);
+
+        const detailsButton = document.createElement("button");
+        detailsButton.textContent = "Details";
+        detailsButton.onclick = showDetails;
+        resultDiv.appendChild(detailsButton);
+      }
+
+      function createTable(title, headers, data) {
+        const table = document.createElement("table");
+        const caption = table.createCaption();
+        caption.textContent = title;
+
+        const thead = table.createTHead();
+        const headerRow = thead.insertRow();
+
+        headers.forEach((headerText) => {
+          const th = document.createElement("th");
+          th.textContent = headerText;
+          headerRow.appendChild(th);
+        });
+
+        const tbody = table.createTBody();
+        data.forEach((rowData) => {
+          const row = tbody.insertRow();
+          Object.values(rowData).forEach((value) => {
+            const cell = row.insertCell();
+            cell.textContent = value;
+          });
+        });
+
+        return table;
+      }
+
+      function showDetails() {
+        const normalTimes = document
+          .getElementById("result")
+          .querySelectorAll("#Normal Times tbody tr");
+        const primeTimes = document
+          .getElementById("result")
+          .querySelectorAll("#Prime Times tbody tr");
+
+        const detailsPopup = window.open("", "_blank", "width=600,height=400");
+        detailsPopup.document.write(
+          "</body></html><html><head><title>Details</title></head><body>"
+        );
+
+        detailsPopup.document.write("<h2>Details:</h2>");
+
+        detailsPopup.document.write("<h3>Normal Times:</h3>");
+        detailsPopup.document.write('<table border="1">');
+        detailsPopup.document.write(
+          "<tr><th>Number</th><th>Time (ms)</th></tr>"
+        );
+        normalTimes.forEach((row) => {
+          const columns = row.getElementsByTagName("td");
+          detailsPopup.document.write(
+            `<tr><td>${columns[0].textContent}</td><td>${columns[1].textContent}</td></tr>`
+          );
+        });
+        detailsPopup.document.write("</table>");
+
+        detailsPopup.document.write("<h3>Prime Times:</h3>");
+        detailsPopup.document.write('<table border="1">');
+        detailsPopup.document.write(
+          "<tr><th>Number</th><th>Time (ms)</th></tr>"
+        );
+        primeTimes.forEach((row) => {
+          const columns = row.getElementsByTagName("td");
+          detailsPopup.document.write(
+            `<tr><td>${columns[0].textContent}</td><td>${columns[1].textContent}</td></tr>`
+          );
+        });
+        detailsPopup.document.write("</table>");
+
+        detailsPopup.document.write("</body></html>");
+        detailsPopup.document.close();
+      }
+    </script>
+  </body>
+</html>
